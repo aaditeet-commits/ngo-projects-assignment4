@@ -254,6 +254,8 @@ def admin_delete_project(project_id):
         flash(f'Error: {e}', 'danger')
     return redirect(url_for('admin_dashboard'))
 
+# Initialize DB always - works with both gunicorn and python app.py
+init_db()
+
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True, port=5000)
