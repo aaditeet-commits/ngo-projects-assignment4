@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Manage Projects{% endblock %}
+
+{% block content %}
+<section class="admin-section py-5">
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col">
+                <h2><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h2>
+                <p class="text-muted">Manage your projects and content</p>
+            </div>
+            <div class="col-auto">
+                <a href="{{ url_for('admin_logout') }}" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Add New Project Button -->
+        <div class="mb-4">
+            <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                <i class="fas fa-plus"></i> Add New Project
+            </button>
+        </div>
+
+        <!-- Existing Projects -->
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-list"></i> Existing Projects</h4>
+            </div>
+            <div class="card-body">
+                {% if projects %}
+                    {% for project in projects %}
+                    <div class="project-item border rounded p-3 mb-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-2">
+                                {% if project.images %}
+                                    <img src="{{ url_for('static', filename=project.images[0].image_url) }}" 
+                                         class="img-fluid rounded" 
+                                         alt="{{ project.title }}">
+                                {% else %}
+                                    <div class="bg-secondary rounded d-flex align-items-center justify-content-center" 
+                                         style="height: 100px;">
+                                        <i class="fas fa-image fa-2x text-white"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-7">
+                                <h5>{{ project.title }}</h5>
+                                <p class="text-muted mb-2">{{ project.description[:100] }}...</p>
+                                <span class="badge 
+                                    {% if project.status == 'Ongoing' %}bg-success
+                                    {% elif project.status == 'Completed' %}bg-info
+                                    {% else %}bg-warning{% endif %}">
+                                    {{ project.status }}
+                                </span>
+                                {% if project.location %}
+                                    <span class="ms-2">
+                                        <i class="fas fa-map-marker-alt"></i> {{ project.location }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3 text-end">
+                                <button class="btn btn-sm btn-info" 
+                                        onclick="editProject({{ project.id }}, '{{ project.title }}', '{{ project.description }}', '{{ project.status }}', '{{ project.start_date }}', '{{ project.end_date }}', '{{ project.location }}')">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-danger" 
+                                        onclick="deleteProject({{ project.id }}, '{{ project.title }}')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+                        <h4 class="text-muted">No projects yet</h4>
+                        <p>Click "Add New Project" to create your first project</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Add Project Modal -->
+<div class="modal fade" id="addProjectModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-plus"></i> Add New Project</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin_add_project') }}" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Project Title *</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description *</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status *</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="Ongoing">Ongoing</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Upcoming">Upcoming</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="location" name="location" placeholder="Enter project location">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="images" class="form-label">Upload Images</label>
+                        <input type="file" class="form-control" id="images" name="images" multiple accept="image/*">
+                        <small class="text-muted">You can select multiple images</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Project
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Project Modal -->
+<div class="modal fade" id="editProjectModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Project</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" id="editProjectForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_title" class="form-label">Project Title *</label>
+                        <input type="text" class="form-control" id="edit_title" name="title" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_description" class="form-label">Description *</label>
+                        <textarea class="form-control" id="edit_description" name="description" rows="4" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_status" class="form-label">Status *</label>
+                        <select class="form-select" id="edit_status" name="status" required>
+                            <option value="Ongoing">Ongoing</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Upcoming">Upcoming</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="edit_start_date" name="start_date">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="edit_end_date" name="end_date">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_location" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="edit_location" name="location">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_images" class="form-label">Upload New Images</label>
+                        <input type="file" class="form-control" id="edit_images" name="images" multiple accept="image/*">
+                        <small class="text-muted">Select new images to add (existing images will be kept)</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-save"></i> Update Project
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Form (hidden) -->
+<form method="POST" id="deleteProjectForm" style="display: none;">
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function editProject(id, title, description, status, startDate, endDate, location) {
+    document.getElementById('editProjectForm').action = `/admin/project/edit/${id}`;
+    document.getElementById('edit_title').value = title;
+    document.getElementById('edit_description').value = description;
+    document.getElementById('edit_status').value = status;
+    document.getElementById('edit_start_date').value = startDate !== 'None' ? startDate : '';
+    document.getElementById('edit_end_date').value = endDate !== 'None' ? endDate : '';
+    document.getElementById('edit_location').value = location !== 'None' ? location : '';
+    
+    var modal = new bootstrap.Modal(document.getElementById('editProjectModal'));
+    modal.show();
+}
+
+function deleteProject(id, title) {
+    if (confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
+        const form = document.getElementById('deleteProjectForm');
+        form.action = `/admin/project/delete/${id}`;
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

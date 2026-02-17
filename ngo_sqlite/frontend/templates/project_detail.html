@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.title }} - Project Details{% endblock %}
+
+{% block content %}
+<section class="project-detail-section py-5">
+    <div class="container">
+        <!-- Back Button -->
+        <div class="mb-4">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to Projects
+            </a>
+        </div>
+
+        <div class="row">
+            <!-- Project Images -->
+            <div class="col-lg-6 mb-4">
+                {% if project.images %}
+                    <div id="projectCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for image in project.images %}
+                                <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                    <img src="{{ url_for('static', filename=image.image_url) }}" 
+                                         class="d-block w-100 rounded" 
+                                         alt="{{ project.title }}"
+                                         style="height: 400px; object-fit: cover;">
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if project.images|length > 1 %}
+                            <button class="carousel-control-prev" type="button" data-bs-target="#projectCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#projectCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="bg-secondary d-flex align-items-center justify-content-center rounded" 
+                         style="height: 400px;">
+                        <i class="fas fa-image fa-5x text-white"></i>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Project Details -->
+            <div class="col-lg-6">
+                <div class="mb-3">
+                    {% if project.status == 'Ongoing' %}
+                        <span class="badge bg-success fs-6">{{ project.status }}</span>
+                    {% elif project.status == 'Completed' %}
+                        <span class="badge bg-info fs-6">{{ project.status }}</span>
+                    {% else %}
+                        <span class="badge bg-warning fs-6">{{ project.status }}</span>
+                    {% endif %}
+                </div>
+
+                <h1 class="display-5 mb-4">{{ project.title }}</h1>
+
+                <div class="project-meta mb-4">
+                    {% if project.location %}
+                        <p class="mb-2">
+                            <i class="fas fa-map-marker-alt text-primary"></i>
+                            <strong>Location:</strong> {{ project.location }}
+                        </p>
+                    {% endif %}
+
+                    {% if project.start_date %}
+                        <p class="mb-2">
+                            <i class="fas fa-calendar-alt text-primary"></i>
+                            <strong>Start Date:</strong> {{ project.start_date.strftime('%B %d, %Y') }}
+                        </p>
+                    {% endif %}
+
+                    {% if project.end_date %}
+                        <p class="mb-2">
+                            <i class="fas fa-calendar-check text-primary"></i>
+                            <strong>End Date:</strong> {{ project.end_date.strftime('%B %d, %Y') }}
+                        </p>
+                    {% endif %}
+
+                    <p class="mb-2">
+                        <i class="fas fa-clock text-primary"></i>
+                        <strong>Created:</strong> {{ project.created_at.strftime('%B %d, %Y') }}
+                    </p>
+                </div>
+
+                <div class="alert alert-primary">
+                    <h5><i class="fas fa-info-circle"></i> About This Project</h5>
+                    <p class="mb-0">{{ project.description }}</p>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary btn-lg">
+                        <i class="fas fa-hand-holding-heart"></i> Support This Project
+                    </button>
+                    <button class="btn btn-outline-primary">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Impact Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3 class="mb-4">Project Impact</h3>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                                <h4>250+</h4>
+                                <p class="text-muted">People Impacted</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <i class="fas fa-hands-helping fa-3x text-success mb-3"></i>
+                                <h4>50+</h4>
+                                <p class="text-muted">Volunteers</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <i class="fas fa-check-circle fa-3x text-info mb-3"></i>
+                                <h4>85%</h4>
+                                <p class="text-muted">Goal Achieved</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
